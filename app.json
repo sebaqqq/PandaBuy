@@ -1,0 +1,54 @@
+{
+  "expo": {
+    "name": "pandaBuy",
+    "slug": "pandaBuy",
+    "version": "1.0.0",
+    "orientation": "portrait",
+    "icon": "./assets/panda_sin.png",
+    "userInterfaceStyle": "light",
+    "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
+      "backgroundColor": "#ffffff"
+    },
+    "plugins": [
+      [
+        "expo-media-library",
+        {
+          "pothosPermission": "Allow $(PRODUCT_NAME) to access your photos",
+          "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos",
+          "isAccessMediaLocationEnabled": "true"
+        }
+      ]
+    ],
+    "assetBundlePatterns": ["**/*"],
+    "ios": {
+      "supportsTablet": true,
+      "infoPlist": {
+        "NSPhotoLibraryUsageDescription": "Allow $(PRODUCT_NAME) to access your photos",
+        "NSPhotoLibraryAddUsageDescription": "Allow $(PRODUCT_NAME) to save photos"
+      }
+    },
+    "android": {
+      "adaptiveIcon": {
+        "foregroundImage": "./assets/panda_sin.png",
+        "backgroundColor": "#D4D4D4"
+      },
+      "permissions": [
+        "CAMERA",
+        "android.permission.READ_EXTERNAL_STORAGE",
+        "android.permission.WRITE_EXTERNAL_STORAGE",
+        "android.permission.ACCESS_MEDIA_LOCATION"
+      ],
+      "package": "com.sebaquintana.appminiMarket"
+    },
+    "web": {
+      "favicon": "./assets/panda_sin.ico"
+    },
+    "extra": {
+      "eas": {
+        "projectId": "90acd7ed-5d8e-46d1-a4b8-7b1c9df08ad6"
+      }
+    }
+  }
+}
