@@ -15,12 +15,12 @@
       [
         "expo-media-library",
         {
-          "pothosPermission": "Allow $(PRODUCT_NAME) to access your photos",
+          "photosPermission": "Allow $(PRODUCT_NAME) to access your photos",
           "savePhotosPermission": "Allow $(PRODUCT_NAME) to save photos",
           "isAccessMediaLocationEnabled": "true"
         }
       ]
-    ],
+    ],    
     "assetBundlePatterns": ["**/*"],
     "ios": {
       "supportsTablet": true,

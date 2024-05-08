@@ -44,7 +44,7 @@ const CrearLista = () => {
           color="#1C2120"
           onPress={() => navigation.navigate("Crear Categoria")}
         />
-      ),
+      )
     });
   }, [navigation]);
 

@@ -46,8 +46,10 @@ const Historial = () => {
   }, [refreshing]);
 
   useEffect(() => {
-    filtrarHistorialPorFecha(selectedDate);
-  }, [selectedDate]);
+    calcularTotalPorFecha(historialFiltrado);
+  }, [historialFiltrado]);
+  
+  
 
   const calcularTotalPorFecha = (historialData) => {
     const totalPorFecha = {};
@@ -75,15 +77,23 @@ const Historial = () => {
   };
 
   const filtrarHistorialPorFecha = (fecha) => {
-    const fechaSeleccionada = formatFecha(fecha);
+    const fechaSeleccionada = new Date(fecha);
     const filteredHistorial = historialCompleto.filter((item) => {
-      const fechaItem = formatFecha(item.fecha);
-      return fechaItem === fechaSeleccionada;
+      const fechaItem = new Date(item.fecha);
+      return (
+        fechaSeleccionada.getDate() === fechaItem.getDate() &&
+        fechaSeleccionada.getMonth() === fechaItem.getMonth() &&
+        fechaSeleccionada.getFullYear() === fechaItem.getFullYear()
+      );
     });
     setHistorialFiltrado(filteredHistorial);
     calcularTotalPorFecha(filteredHistorial);
   };
-
+  
+  const handleDateSelect = (date) => {
+    setSelectedDate(date.dateString); // Usa date.dateString directamente
+  };
+  
   const formatFecha = (fecha) => {
     const fechaObj = new Date(fecha);
     return fechaObj.toLocaleDateString("es-ES", {
@@ -93,14 +103,32 @@ const Historial = () => {
     });
   };
 
-  const handleDateSelect = (date) => {
-    setSelectedDate(date.dateString);
-  };
-
   const onRefresh = () => {
     setRefreshing(true);
-    fetchHistorial();
-    setRefreshing(false);
+    fetchHistorial().then(() => {
+      setRefreshing(false); 
+    });
+  };
+  
+  const fetchHistorial = async () => {
+    try {
+      const historialCollection = collection(db, "historialVentas");
+      const historialSnapshot = await getDocs(historialCollection);
+      const historialData = historialSnapshot.docs.map((doc) => {
+        const data = doc.data();
+        const totalCompra = parseFloat(data.totalCompra);
+        return {
+          id: doc.id,
+          ...data,
+          totalCompra: isNaN(totalCompra) ? 0 : totalCompra,
+        };
+      });
+      setHistorialCompleto(historialData);
+      calcularTotalPorFecha(historialData);
+      calcularTotalPorMes(historialData);
+    } catch (error) {
+      console.error("Error fetching historial:", error);
+    }
   };
 
   const renderItem = ({ item }) => (
@@ -119,13 +147,17 @@ const Historial = () => {
 
   return (
     <View style={styles.container}>
-      <Calendar
-        onDayPress={handleDateSelect}
-        markedDates={{
-          [selectedDate]: { selected: true, selectedColor: "blue" },
-        }}
-        style={{ width: "100%" }}
-      />
+<Calendar
+  onDayPress={(date) => {
+    handleDateSelect(date);
+    filtrarHistorialPorFecha(date.dateString);
+  }}
+  markedDates={{
+    [selectedDate]: { selected: true, selectedColor: "blue" },
+  }}
+  style={{ width: "100%" }}
+/>
+
       <FlatList
         data={historialFiltrado}
         renderItem={renderItem}
