@@ -116,7 +116,7 @@ const Lista = () => {
   const renderizarItem = ({ item }) => {
     let containerStyle = styles.itemContainer;
     if (item.cantidad <= 10) {
-      containerStyle = { ...containerStyle, backgroundColor: "#F16867" };
+      containerStyle = { ...containerStyle, backgroundColor: "#ffcccc" };
     } else if (item.cantidad <= 20) {
       containerStyle = { ...containerStyle, backgroundColor: "#D9F2AA" };
     }
@@ -125,7 +125,9 @@ const Lista = () => {
       <View style={containerStyle}>
         <TouchableOpacity onPress={() => handlePresionarProducto(item.id)}>
           <View style={styles.textoContainer}>
-            <Text style={styles.nombre}>{`Nombre: ${item.nombreProducto}`}</Text>
+            <Text
+              style={styles.nombre}
+            >{`Nombre: ${item.nombreProducto}`}</Text>
             <Text style={styles.detalle}>{`Categoría: ${item.categoria}`}</Text>
             <Text style={styles.detalle}>{`Precio/u: ${item.precio}`}</Text>
             <Text style={styles.detalle}>{`Cantidad: ${item.cantidad}`}</Text>
@@ -137,13 +139,13 @@ const Lista = () => {
                     navigation.navigate("ActualizarLista", { producto: item })
                   }
                 >
-                  <Icon name="pen" size={20} color="#fff" />
+                  <Icon name="pen" size={20} color="#1C2120" />
                 </TouchableOpacity>
                 <TouchableOpacity
                   style={styles.botonEliminar}
                   onPress={() => handleEliminarProducto(item.id)}
                 >
-                  <Icon name="trash" size={20} color="#fff" />
+                  <Icon name="trash" size={20} color="#1C2120" />
                 </TouchableOpacity>
               </View>
             )}
