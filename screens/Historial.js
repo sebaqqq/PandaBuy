@@ -6,11 +6,56 @@ import {
   FlatList,
   TouchableOpacity,
   RefreshControl,
+  Dimensions,
 } from "react-native";
 import { db } from "../dataBase/Firebase";
 import { collection, getDocs } from "firebase/firestore";
 import { useNavigation } from "@react-navigation/native";
-import { Calendar } from "react-native-calendars";
+import { Calendar, LocaleConfig } from "react-native-calendars";
+import { MaterialCommunityIcons } from "@expo/vector-icons";
+
+LocaleConfig.locales["es"] = {
+  monthNames: [
+    "Enero",
+    "Febrero",
+    "Marzo",
+    "Abril",
+    "Mayo",
+    "Junio",
+    "Julio",
+    "Agosto",
+    "Septiembre",
+    "Octubre",
+    "Noviembre",
+    "Diciembre",
+  ],
+  monthNamesShort: [
+    "Ene.",
+    "Feb.",
+    "Mar.",
+    "Abr.",
+    "May.",
+    "Jun.",
+    "Jul.",
+    "Ago.",
+    "Sept.",
+    "Oct.",
+    "Nov.",
+    "Dic.",
+  ],
+  dayNames: [
+    "Domingo",
+    "Lunes",
+    "Martes",
+    "Miércoles",
+    "Jueves",
+    "Viernes",
+    "Sábado",
+  ],
+  dayNamesShort: ["Dom.", "Lun.", "Mar.", "Mié.", "Jue.", "Vie.", "Sáb."],
+  today: "Hoy",
+};
+LocaleConfig.defaultLocale = "es";
 
 const Historial = () => {
   const navigation = useNavigation();
@@ -20,6 +65,32 @@ const Historial = () => {
   const [totalPorMes, setTotalPorMes] = useState({});
   const [selectedDate, setSelectedDate] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+
+  React.useLayoutEffect(() => {
+    navigation.setOptions({
+      headerRight: () => (
+        <MaterialCommunityIcons
+          name="update"
+          size={26}
+          color="#1C2120"
+          onPress={handleRefresh}
+          style={{ marginRight: 20 }}
+        />
+      ),
+    });
+  }, [navigation]);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+
+    try {
+      await fetchHistorial();
+    } catch (error) {
+      console.error("Error al refrescar el historial:", error);
+    } finally {
+      setRefreshing(false);
+    }
+  };
 
   useEffect(() => {
     fetchHistorial();
@@ -120,11 +191,11 @@ const Historial = () => {
           handleDateSelect(date);
         }}
         markedDates={{
-          [selectedDate]: { selected: true, selectedColor: "blue" },
+          [selectedDate]: { selected: true, selectedColor: "#1C2120" },
         }}
-        style={{ width: "100%" }}
+        style={styles.calendario}
+        locale={"es"}
       />
-
       <FlatList
         data={historialFiltrado}
         renderItem={renderItem}
@@ -158,6 +229,10 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+  },
+  calendario: {
+    width: Dimensions.get("window").width,
+    marginBottom: 12,
   },
   itemContainer: {
     width: 350,
