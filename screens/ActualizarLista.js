@@ -18,15 +18,20 @@ const ActualizarLista = ({ route }) => {
   const [nuevoPrecioOferta, setNuevoPrecioOferta] = useState(
     `${route.params.producto.precioOferta}`
   );
+  const [nuevaCantidad, setNuevaCantidad] = useState(
+    route.params.producto.cantidad || "0"
+  );
   const navigation = useNavigation();
 
   const handleActualizarProducto = async () => {
     try {
       const nuevosValores = {
+        id: id, // Agregar campo id
         categoria: nuevaCategoria,
         nombreProducto: nuevoNombre,
         precio: parseFloat(nuevoPrecio),
         precioOferta: parseFloat(nuevoPrecioOferta),
+        cantidad: parseInt(nuevaCantidad), // Agregar campo cantidad
       };
 
       await updateDoc(doc(db, "productos", id), nuevosValores);
@@ -39,6 +44,12 @@ const ActualizarLista = ({ route }) => {
 
   return (
     <View style={styles.container}>
+      <Text style={styles.label}>ID:</Text>
+      <TextInput
+        style={styles.input}
+        value={id}
+        editable={false} // Campo ID no editable
+      />
       <Text style={styles.label}>Nombre del Producto:</Text>
       <TextInput
         style={styles.input}
@@ -63,6 +74,13 @@ const ActualizarLista = ({ route }) => {
         style={styles.input}
         value={nuevoPrecioOferta}
         onChangeText={(text) => setNuevoPrecioOferta(text)}
+        keyboardType="numeric"
+      />
+      <Text style={styles.label}>Cantidad:</Text>
+      <TextInput
+        style={styles.input}
+        value={nuevaCantidad}
+        onChangeText={(text) => setNuevaCantidad(text)}
         keyboardType="numeric"
       />
       <Button title="Actualizar Producto" onPress={handleActualizarProducto} />

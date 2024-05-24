@@ -26,6 +26,7 @@ const CrearLista = () => {
     categoria: "",
     precio: "",
     precioOferta: "",
+    cantidad: "", // Añadir el campo cantidad
   });
   const [message, setMessage] = useState(null);
   const [categorias, setCategorias] = useState([]);
@@ -45,14 +46,14 @@ const CrearLista = () => {
           color="#1C2120"
           onPress={() => navigation.navigate("Crear Categoria")}
         />
-      )
+      ),
     });
   }, [navigation]);
 
   useEffect(() => {
     (async () => {
       const { status } = await BarCodeScanner.requestPermissionsAsync();
-      setHasPermission(status === 'granted');
+      setHasPermission(status === "granted");
     })();
     obtenerCategorias();
   }, []);
@@ -77,9 +78,8 @@ const CrearLista = () => {
         nombreProducto: state.nombreProducto,
         categoria: state.categoria,
         precio: parseFloat(state.precio),
-        precioOferta: state.precioOferta
-          ? parseFloat(state.precioOferta)
-          : null,
+        precioOferta: state.precioOferta ? parseFloat(state.precioOferta) : null,
+        cantidad: state.cantidad ? parseInt(state.cantidad, 10) : null, // Añadir la cantidad opcional
       };
 
       await setDoc(doc(db, "productos", state.idProducto), producto);
@@ -91,6 +91,7 @@ const CrearLista = () => {
         categoria: "",
         precio: "",
         precioOferta: "",
+        cantidad: "", // Resetear el campo cantidad
       });
     } catch (error) {
       console.error("Error al guardar el producto:", error);
@@ -184,7 +185,10 @@ const CrearLista = () => {
     return (
       <View style={styles.loadingContainer}>
         <Text>No access to camera</Text>
-        <Button title="Grant Permission" onPress={() => BarCodeScanner.requestPermissionsAsync()} />
+        <Button
+          title="Grant Permission"
+          onPress={() => BarCodeScanner.requestPermissionsAsync()}
+        />
       </View>
     );
   }
@@ -194,7 +198,12 @@ const CrearLista = () => {
       <ScrollView style={styles.container}>
         <View style={styles.inputContainer}>
           <Text>ID</Text>
-          <Text>ID: {state.idProducto}</Text>
+          <TextInput
+            style={styles.input}
+            placeholder="ID del producto"
+            value={state.idProducto}
+            onChangeText={(value) => handleChangeText("idProducto", value)}
+          />
         </View>
         <View style={styles.inputContainer}>
           <Button title="Detener escaneo" onPress={() => setScanning(false)} />
@@ -217,7 +226,13 @@ const CrearLista = () => {
       }
     >
       <View style={styles.inputContainer}>
-        <Text>ID: {state.idProducto}</Text>
+        <Text>ID del producto</Text>
+        <TextInput
+          style={styles.input}
+          placeholder="ID del producto"
+          value={state.idProducto}
+          onChangeText={(value) => handleChangeText("idProducto", value)}
+        />
       </View>
       <View>
         <TouchableOpacity onPress={startScanning} style={styles.boton}>
@@ -268,6 +283,16 @@ const CrearLista = () => {
           onChangeText={(value) => handleChangeText("precioOferta", value)}
         />
       </View>
+      <View style={styles.inputContainer}>
+        <Text>Ingrese la cantidad (opcional) </Text>
+        <TextInput
+          style={styles.input}
+          placeholder="Cantidad"
+          keyboardType="numeric"
+          value={state.cantidad}
+          onChangeText={(value) => handleChangeText("cantidad", value)}
+        />
+      </View>
       <View>
         <TouchableOpacity onPress={GuardarProducto} style={styles.boton}>
           <Text style={styles.botonText}>Guardar Producto</Text>
@@ -281,11 +306,12 @@ const CrearLista = () => {
 const styles = StyleSheet.create({
   container: {
     flex: 1,
-    padding: 16,
+    paddingLeft: 30,
+    paddingRight: 30,
     backgroundColor: "#fff",
   },
   inputContainer: {
-    marginBottom: 16,
+    marginBottom: 5,
   },
   input: {
     width: "100%",

@@ -113,35 +113,45 @@ const Lista = () => {
     );
   };
 
-  const renderizarItem = ({ item }) => (
-    <View style={styles.itemContainer}>
-      <TouchableOpacity onPress={() => handlePresionarProducto(item.id)}>
-        <View style={styles.textoContainer}>
-          <Text style={styles.nombre}>{`Nombre: ${item.nombreProducto}`}</Text>
-          <Text style={styles.detalle}>{`Categoría: ${item.categoria}`}</Text>
-          <Text style={styles.detalle}>{`Precio/u: ${item.precio}`}</Text>
-          {productoExpandido === item.id && (
-            <View style={styles.botonesContainer}>
-              <TouchableOpacity
-                style={styles.botonActualizar}
-                onPress={() =>
-                  navigation.navigate("ActualizarLista", { producto: item })
-                }
-              >
-                <Icon name="pen" size={20} color="#fff" />
-              </TouchableOpacity>
-              <TouchableOpacity
-                style={styles.botonEliminar}
-                onPress={() => handleEliminarProducto(item.id)}
-              >
-                <Icon name="trash" size={20} color="#fff" />
-              </TouchableOpacity>
-            </View>
-          )}
-        </View>
-      </TouchableOpacity>
-    </View>
-  );
+  const renderizarItem = ({ item }) => {
+    let containerStyle = styles.itemContainer;
+    if (item.cantidad <= 10) {
+      containerStyle = { ...containerStyle, backgroundColor: "#F16867" };
+    } else if (item.cantidad <= 20) {
+      containerStyle = { ...containerStyle, backgroundColor: "#D9F2AA" };
+    }
+
+    return (
+      <View style={containerStyle}>
+        <TouchableOpacity onPress={() => handlePresionarProducto(item.id)}>
+          <View style={styles.textoContainer}>
+            <Text style={styles.nombre}>{`Nombre: ${item.nombreProducto}`}</Text>
+            <Text style={styles.detalle}>{`Categoría: ${item.categoria}`}</Text>
+            <Text style={styles.detalle}>{`Precio/u: ${item.precio}`}</Text>
+            <Text style={styles.detalle}>{`Cantidad: ${item.cantidad}`}</Text>
+            {productoExpandido === item.id && (
+              <View style={styles.botonesContainer}>
+                <TouchableOpacity
+                  style={styles.botonActualizar}
+                  onPress={() =>
+                    navigation.navigate("ActualizarLista", { producto: item })
+                  }
+                >
+                  <Icon name="pen" size={20} color="#fff" />
+                </TouchableOpacity>
+                <TouchableOpacity
+                  style={styles.botonEliminar}
+                  onPress={() => handleEliminarProducto(item.id)}
+                >
+                  <Icon name="trash" size={20} color="#fff" />
+                </TouchableOpacity>
+              </View>
+            )}
+          </View>
+        </TouchableOpacity>
+      </View>
+    );
+  };
 
   return (
     <View style={styles.container}>
