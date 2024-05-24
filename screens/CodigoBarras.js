@@ -15,6 +15,8 @@ import { Audio } from "expo-av";
 import { db, auth } from "../dataBase/Firebase";
 import { getDoc, doc, collection, addDoc } from "firebase/firestore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
+import { serverTimestamp } from "firebase/firestore";
+
 
 const EscanerCodigoBarras = () => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -115,6 +117,57 @@ const EscanerCodigoBarras = () => {
       return;
     }
 
+    const finalizarCompra = async () => {
+      if (carrito.length === 0) {
+        Alert.alert(
+          "Carrito vacío",
+          "Agrega al menos un producto al carrito antes de finalizar la compra."
+        );
+        return;
+      }
+    
+      try {
+        const user = auth.currentUser;
+        if (user) {
+          const userId = user.uid;
+          const userDoc = doc(db, "users", userId);
+          const userSnap = await getDoc(userDoc); // Marca la función como async
+          if (userSnap.exists()) {
+            const userData = userSnap.data();
+            const firstName = userData.firstName;
+            console.log("Nombre del usuario:", firstName);
+    
+            await addDoc(collection(db, "historialVentas"), {
+              carrito,
+              totalCompra,
+              fecha: obtenerFechaActual(), // Utiliza la función para obtener la fecha actual
+              usuario: { firstName },
+            });
+    
+            setCarrito([]);
+            setTotalCompra(0);
+    
+            Alert.alert("Compra finalizada");
+          } else {
+            console.error("Usuario no encontrado");
+            Alert.alert("Usuario no encontrado");
+          }
+        } else {
+          Alert.alert(
+            "Usuario no autenticado",
+            "Debes iniciar sesión para finalizar la compra."
+          );
+        }
+      } catch (error) {
+        console.error("Error al finalizar la compra:", error);
+        Alert.alert(
+          "Error al finalizar la compra",
+          "Por favor, inténtalo de nuevo más tarde."
+        );
+      }
+    };
+    
+
     try {
       const user = auth.currentUser;
       if (user) {
@@ -129,7 +182,7 @@ const EscanerCodigoBarras = () => {
           await addDoc(collection(db, "historialVentas"), {
             carrito,
             totalCompra,
-            fecha: new Date().toISOString(),
+            fecha: serverTimestamp(),
             usuario: { firstName },
           });
 
@@ -175,13 +228,11 @@ const EscanerCodigoBarras = () => {
   if (hasPermission === false) {
     return <Text>Permiso de la cámara no concedido</Text>;
   }
-  
+
+
   return (
     <View style={styles.container}>
-      <ScrollView
-        refreshControl={<RefreshControl refreshing={refreshing} />}
-        contentContainerStyle={styles.scrollViewContent}
-      >
+
         <View style={styles.scannerContainer}>
           <BarCodeScanner
             key={reloadKey}
@@ -189,7 +240,16 @@ const EscanerCodigoBarras = () => {
             onBarCodeScanned={handleBarCodeScanned}
           />
           <View style={styles.scannerRect}></View>
+          <View style={styles.buttonContainer}>
+            <TouchableOpacity
+              style={styles.actualizarButton}
+              onPress={reloadCamera}>
+            <Text style={styles.buttonText}>Reiniciar Escáner</Text>
+          </TouchableOpacity>
         </View>
+        </View>
+
+
         <ScrollView style={styles.carritoContainer}>
           {carrito.map((producto) => (
             <View key={producto.idProducto} style={styles.producto}>
@@ -240,7 +300,6 @@ const EscanerCodigoBarras = () => {
             <Text style={styles.botonText}>Finalizar Compra</Text>
           </TouchableOpacity>
         </View>
-      </ScrollView>
     </View>
   );
 };
@@ -256,27 +315,19 @@ const styles = StyleSheet.create({
     alignItems: "center",
     justifyContent: "center",
   },
-  camera: {
-    aspectRatio: 4 / 3,
-  },
-  cameraContainer: {
-    aspectRatio: 4 / 3,
-    width: "98%",
-    justifyContent: "center",
-    alignItems: "center",
-    position: "relative",
-    borderRadius: 100,
-  },
+
   buttonContainer: {
-    flexDirection: "row",
-    justifyContent: "space-between",
+    flexDirection: "column", // Cambio a columna para centrar verticalmente
+    justifyContent: "center", // Centrado vertical
+    alignItems: "center", // Centrado horizontal
     width: "95%",
-    marginBottom: "2%",
+    marginTop: "10%",
   },
   scannerContainer: {
     flex: 1,
     alignItems: "center",
     justifyContent: "center",
+    width: "100%",
   },
   scannerRect: {
     width: Dimensions.get("window").width * 0.4,
@@ -286,11 +337,14 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     opacity: 0.5,
   },
+  absoluteFillObject:{
+    width: "100%",
+
+  },
   actualizarButton: {
     backgroundColor: "#EDEDED",
     paddingHorizontal: 20,
     paddingVertical: 10,
-    marginBottom: "2%",
     borderRadius: 5,
     opacity: 0.7,
   },
