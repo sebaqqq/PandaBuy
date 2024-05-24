@@ -33,20 +33,6 @@ const DetallesCarrito = ({ route }) => {
     fetchCarrito();
   }, [carritoId]);
 
-  const formatDate = (dateString) => {
-    const options = {
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      second: "2-digit",
-      hour12: false,
-    };
-    const date = new Date(dateString);
-    return date.toLocaleDateString("es-ES", options);
-  };
-
   const formatId = (idString) => {
     return idString.match(/.{1,4}/g).join("-");
   };
@@ -79,8 +65,11 @@ const DetallesCarrito = ({ route }) => {
     <ScrollView contentContainerStyle={styles.scrollContainer}>
       <View style={styles.container}>
         <Text style={styles.title}>Detalles del Carrito</Text>
-        <Text>ID: {formatId(carritoId)}</Text>
-        <Text>Fecha: {formatDate(carrito.fecha)}</Text>
+        <Text style={styles.textoDetalle}>ID: {formatId(carritoId)}</Text>
+        <Text style={styles.textoDetalle}>Fecha: {carrito.fecha}</Text>
+        <Text style={styles.textoDetalle}>
+          Total Compra: {carrito.totalCompra}
+        </Text>
         {carrito.productos.length > 0 && (
           <View style={styles.productContainer}>
             <Text style={styles.productTitle}>Productos:</Text>
@@ -109,7 +98,6 @@ const DetallesCarrito = ({ route }) => {
             </View>
           </View>
         )}
-        <Text>Total Compra: {carrito.totalCompra}</Text>
       </View>
     </ScrollView>
   );
@@ -125,9 +113,13 @@ const styles = StyleSheet.create({
     backgroundColor: "#fff",
   },
   title: {
-    fontSize: 24,
+    fontSize: 28,
     fontWeight: "bold",
     marginBottom: 20,
+  },
+  textoDetalle: {
+    fontSize: 17,
+    marginBottom: 6,
   },
   productContainer: {
     marginBottom: 20,
