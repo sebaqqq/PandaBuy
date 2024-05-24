@@ -10,7 +10,7 @@ import {
   Dimensions,
   RefreshControl,
 } from "react-native";
-import { Camera } from "expo-camera";
+import { BarCodeScanner } from "expo-barcode-scanner";
 import { Audio } from "expo-av";
 import { db, auth } from "../dataBase/Firebase";
 import { getDoc, doc, collection, addDoc } from "firebase/firestore";
@@ -20,15 +20,13 @@ const EscanerCodigoBarras = () => {
   const [hasPermission, setHasPermission] = useState(null);
   const [carrito, setCarrito] = useState([]);
   const [totalCompra, setTotalCompra] = useState(0);
-  const [cameraActive, setCameraActive] = useState(true);
-  const [cameraRef, setCameraRef] = useState(null);
-  const [reloadKey, setReloadKey] = useState(0);
   const [scanning, setScanning] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
+  const [reloadKey, setReloadKey] = useState(0);
 
   useEffect(() => {
     (async () => {
-      const { status } = await Camera.requestCameraPermissionsAsync();
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
       setHasPermission(status === "granted");
     })();
   }, []);
@@ -158,11 +156,6 @@ const EscanerCodigoBarras = () => {
     }
   };
 
-  const toggleCamera = () => {
-    setCameraActive((prevState) => !prevState);
-    setReloadKey((prevKey) => prevKey + 1);
-  };
-
   const reloadCamera = () => {
     setScanning(true);
     setRefreshing(true);
@@ -182,42 +175,20 @@ const EscanerCodigoBarras = () => {
   if (hasPermission === false) {
     return <Text>Permiso de la cámara no concedido</Text>;
   }
-
+  
   return (
     <View style={styles.container}>
       <ScrollView
         refreshControl={<RefreshControl refreshing={refreshing} />}
         contentContainerStyle={styles.scrollViewContent}
       >
-        <View style={styles.cameraContainer}>
-          <Camera
+        <View style={styles.scannerContainer}>
+          <BarCodeScanner
             key={reloadKey}
-            style={[StyleSheet.absoluteFillObject, styles.camera]}
+            style={StyleSheet.absoluteFillObject}
             onBarCodeScanned={handleBarCodeScanned}
-            type={Camera.Constants.Type.back}
-            autoFocus={Camera.Constants.AutoFocus.on}
-            flashMode={Camera.Constants.FlashMode.on}
-            ratio="3:3"
-            ref={cameraRef}
           />
-          <View style={styles.scannerContainer}>
-            <View style={styles.scannerRect}></View>
-          </View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.actualizarButton}
-              onPress={onRefresh}
-            >
-              <Text style={styles.buttonText}>Actualizar Cámara</Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              style={styles.actualizarButton}
-              onPress={toggleCamera}
-            >
-              <Text style={styles.buttonText}>Encender Cámara</Text>
-            </TouchableOpacity>
-          </View>
+          <View style={styles.scannerRect}></View>
         </View>
         <ScrollView style={styles.carritoContainer}>
           {carrito.map((producto) => (

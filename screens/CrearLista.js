@@ -15,7 +15,7 @@ import { useNavigation } from "@react-navigation/native";
 import { MaterialIcons } from "@expo/vector-icons";
 import { db } from "../dataBase/Firebase";
 import { collection, getDocs, setDoc, doc, getDoc } from "firebase/firestore";
-import { Camera } from "expo-camera";
+import { BarCodeScanner } from "expo-barcode-scanner";
 import { Audio } from "expo-av";
 
 const CrearLista = () => {
@@ -30,6 +30,7 @@ const CrearLista = () => {
   const [message, setMessage] = useState(null);
   const [categorias, setCategorias] = useState([]);
   const [scanning, setScanning] = useState(false);
+  const [hasPermission, setHasPermission] = useState(null);
   const [refreshing, setRefreshing] = useState(false);
   const [productosEscaneados, setProductosEscaneados] = useState([]);
   const [mostrarAlerta, setMostrarAlerta] = useState(true);
@@ -49,6 +50,10 @@ const CrearLista = () => {
   }, [navigation]);
 
   useEffect(() => {
+    (async () => {
+      const { status } = await BarCodeScanner.requestPermissionsAsync();
+      setHasPermission(status === 'granted');
+    })();
     obtenerCategorias();
   }, []);
 
@@ -168,6 +173,22 @@ const CrearLista = () => {
     }
   };
 
+  if (hasPermission === null) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>Requesting for camera permission</Text>
+      </View>
+    );
+  }
+  if (hasPermission === false) {
+    return (
+      <View style={styles.loadingContainer}>
+        <Text>No access to camera</Text>
+        <Button title="Grant Permission" onPress={() => BarCodeScanner.requestPermissionsAsync()} />
+      </View>
+    );
+  }
+
   if (scanning) {
     return (
       <ScrollView style={styles.container}>
@@ -179,9 +200,8 @@ const CrearLista = () => {
           <Button title="Detener escaneo" onPress={() => setScanning(false)} />
         </View>
         <View style={styles.cameraContainer}>
-          <Camera
+          <BarCodeScanner
             style={styles.camera}
-            type={Camera.Constants.Type.back}
             onBarCodeScanned={handleBarCodeScanned}
           />
         </View>
