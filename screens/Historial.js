@@ -216,7 +216,7 @@ const Historial = () => {
         <Text style={styles.totalText}>Total por Mes:</Text>
         {Object.keys(totalPorMes).map((yearMonth) => (
           <Text key={yearMonth}>
-            {yearMonth}: {totalPorMes[yearMonth]}
+            {yearMonth} : {totalPorMes[yearMonth]}
           </Text>
         ))}
       </View>
