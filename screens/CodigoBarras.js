@@ -8,15 +8,13 @@ import {
   Alert,
   ScrollView,
   Dimensions,
-  RefreshControl,
 } from "react-native";
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { Audio } from "expo-av";
 import { db, auth } from "../dataBase/Firebase";
 import { getDoc, doc, collection, addDoc } from "firebase/firestore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-import { serverTimestamp } from "firebase/firestore";
-
+// import { serverTimestamp } from "firebase/firestore";
 
 const EscanerCodigoBarras = () => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -108,6 +106,14 @@ const EscanerCodigoBarras = () => {
     setCarrito(nuevoCarrito);
   };
 
+  const obtenerFechaActual = () => {
+    const fechaActual = new Date();
+    const dia = fechaActual.getDate().toString().padStart(2, "0");
+    const mes = (fechaActual.getMonth() + 1).toString().padStart(2, "0");
+    const año = fechaActual.getFullYear().toString().slice(-2);
+    return `${dia}/${mes}/${año}`;
+  };
+
   const finalizarCompra = async () => {
     if (carrito.length === 0) {
       Alert.alert(
@@ -125,28 +131,28 @@ const EscanerCodigoBarras = () => {
         );
         return;
       }
-    
+
       try {
         const user = auth.currentUser;
         if (user) {
           const userId = user.uid;
           const userDoc = doc(db, "users", userId);
-          const userSnap = await getDoc(userDoc); // Marca la función como async
+          const userSnap = await getDoc(userDoc);
           if (userSnap.exists()) {
             const userData = userSnap.data();
             const firstName = userData.firstName;
             console.log("Nombre del usuario:", firstName);
-    
+
             await addDoc(collection(db, "historialVentas"), {
               carrito,
               totalCompra,
-              fecha: obtenerFechaActual(), // Utiliza la función para obtener la fecha actual
+              fecha: obtenerFechaActual(),
               usuario: { firstName },
             });
-    
+
             setCarrito([]);
             setTotalCompra(0);
-    
+
             Alert.alert("Compra finalizada");
           } else {
             console.error("Usuario no encontrado");
@@ -166,7 +172,6 @@ const EscanerCodigoBarras = () => {
         );
       }
     };
-    
 
     try {
       const user = auth.currentUser;
@@ -182,7 +187,7 @@ const EscanerCodigoBarras = () => {
           await addDoc(collection(db, "historialVentas"), {
             carrito,
             totalCompra,
-            fecha: serverTimestamp(),
+            fecha: obtenerFechaActual(),
             usuario: { firstName },
           });
 
@@ -229,77 +234,74 @@ const EscanerCodigoBarras = () => {
     return <Text>Permiso de la cámara no concedido</Text>;
   }
 
-
   return (
     <View style={styles.container}>
-
-        <View style={styles.scannerContainer}>
-          <BarCodeScanner
-            key={reloadKey}
-            style={StyleSheet.absoluteFillObject}
-            onBarCodeScanned={handleBarCodeScanned}
-          />
-          <View style={styles.scannerRect}></View>
-          <View style={styles.buttonContainer}>
-            <TouchableOpacity
-              style={styles.actualizarButton}
-              onPress={reloadCamera}>
+      <View style={styles.scannerContainer}>
+        <BarCodeScanner
+          key={reloadKey}
+          style={StyleSheet.absoluteFillObject}
+          onBarCodeScanned={handleBarCodeScanned}
+        />
+        <View style={styles.scannerRect}></View>
+        <View style={styles.buttonContainer}>
+          <TouchableOpacity
+            style={styles.actualizarButton}
+            onPress={reloadCamera}
+          >
             <Text style={styles.buttonText}>Reiniciar Escáner</Text>
           </TouchableOpacity>
         </View>
-        </View>
-
-
-        <ScrollView style={styles.carritoContainer}>
-          {carrito.map((producto) => (
-            <View key={producto.idProducto} style={styles.producto}>
-              <View style={styles.nombrePrecioContainer}>
-                <Text numberOfLines={2} ellipsizeMode="tail">
-                  producto: {producto.nombreProducto}
-                </Text>
-                <Text>Precio: ${producto.precio.toFixed(0)}</Text>
-              </View>
-              <View style={styles.cantidadEliminarContainer}>
-                <View style={styles.cantidadContainer}>
-                  <Button
-                    title={"-"}
-                    onPress={() =>
-                      actualizarCantidad(
-                        producto.idProducto,
-                        Math.max(producto.cantidad - 1, 0)
-                      )
-                    }
-                  />
-                  <Text style={styles.cantidadText}>{producto.cantidad}</Text>
-                  <Button
-                    title={"+"}
-                    onPress={() =>
-                      actualizarCantidad(
-                        producto.idProducto,
-                        producto.cantidad + 1
-                      )
-                    }
-                  />
-                </View>
-                {producto.cantidad === 0 && (
-                  <MaterialCommunityIcons
-                    name="delete-outline"
-                    size={20}
-                    color="white"
-                    style={styles.iconoEliminar}
-                    onPress={() => removeFromCart(producto.idProducto)}
-                  />
-                )}
-              </View>
+      </View>
+      <ScrollView style={styles.carritoContainer}>
+        {carrito.map((producto) => (
+          <View key={producto.idProducto} style={styles.producto}>
+            <View style={styles.nombrePrecioContainer}>
+              <Text numberOfLines={2} ellipsizeMode="tail">
+                producto: {producto.nombreProducto}
+              </Text>
+              <Text>Precio: ${producto.precio.toFixed(0)}</Text>
             </View>
-          ))}
-        </ScrollView>
-        <View style={styles.totalContainer}>
-          <Text style={styles.totalText}>Total: ${totalCompra}</Text>
-          <TouchableOpacity onPress={finalizarCompra} style={styles.boton}>
-            <Text style={styles.botonText}>Finalizar Compra</Text>
-          </TouchableOpacity>
-        </View>
+            <View style={styles.cantidadEliminarContainer}>
+              <View style={styles.cantidadContainer}>
+                <Button
+                  title={"-"}
+                  onPress={() =>
+                    actualizarCantidad(
+                      producto.idProducto,
+                      Math.max(producto.cantidad - 1, 0)
+                    )
+                  }
+                />
+                <Text style={styles.cantidadText}>{producto.cantidad}</Text>
+                <Button
+                  title={"+"}
+                  onPress={() =>
+                    actualizarCantidad(
+                      producto.idProducto,
+                      producto.cantidad + 1
+                    )
+                  }
+                />
+              </View>
+              {producto.cantidad === 0 && (
+                <MaterialCommunityIcons
+                  name="delete-outline"
+                  size={20}
+                  color="white"
+                  style={styles.iconoEliminar}
+                  onPress={() => removeFromCart(producto.idProducto)}
+                />
+              )}
+            </View>
+          </View>
+        ))}
+      </ScrollView>
+      <View style={styles.totalContainer}>
+        <Text style={styles.totalText}>Total: ${totalCompra}</Text>
+        <TouchableOpacity onPress={finalizarCompra} style={styles.boton}>
+          <Text style={styles.botonText}>Finalizar Compra</Text>
+        </TouchableOpacity>
+      </View>
     </View>
   );
 };
@@ -317,9 +319,9 @@ const styles = StyleSheet.create({
   },
 
   buttonContainer: {
-    flexDirection: "column", // Cambio a columna para centrar verticalmente
-    justifyContent: "center", // Centrado vertical
-    alignItems: "center", // Centrado horizontal
+    flexDirection: "column",
+    justifyContent: "center",
+    alignItems: "center",
     width: "95%",
     marginTop: "10%",
   },
@@ -337,9 +339,8 @@ const styles = StyleSheet.create({
     borderRadius: 10,
     opacity: 0.5,
   },
-  absoluteFillObject:{
+  absoluteFillObject: {
     width: "100%",
-
   },
   actualizarButton: {
     backgroundColor: "#EDEDED",
