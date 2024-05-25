@@ -1,5 +1,11 @@
 import React, { useState } from "react";
-import { View, Text, TextInput, Button, StyleSheet } from "react-native";
+import {
+  View,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  StyleSheet,
+} from "react-native";
 import { useNavigation } from "@react-navigation/native";
 import { db } from "../dataBase/Firebase";
 import { doc, updateDoc } from "firebase/firestore";
@@ -26,12 +32,12 @@ const ActualizarLista = ({ route }) => {
   const handleActualizarProducto = async () => {
     try {
       const nuevosValores = {
-        id: id, // Agregar campo id
+        id: id,
         categoria: nuevaCategoria,
         nombreProducto: nuevoNombre,
         precio: parseFloat(nuevoPrecio),
         precioOferta: parseFloat(nuevoPrecioOferta),
-        cantidad: parseInt(nuevaCantidad), // Agregar campo cantidad
+        cantidad: parseInt(nuevaCantidad),
       };
 
       await updateDoc(doc(db, "productos", id), nuevosValores);
@@ -45,11 +51,7 @@ const ActualizarLista = ({ route }) => {
   return (
     <View style={styles.container}>
       <Text style={styles.label}>ID:</Text>
-      <TextInput
-        style={styles.input}
-        value={id}
-        editable={false} // Campo ID no editable
-      />
+      <TextInput style={styles.input} value={id} editable={false} />
       <Text style={styles.label}>Nombre del Producto:</Text>
       <TextInput
         style={styles.input}
@@ -83,7 +85,9 @@ const ActualizarLista = ({ route }) => {
         onChangeText={(text) => setNuevaCantidad(text)}
         keyboardType="numeric"
       />
-      <Button title="Actualizar Producto" onPress={handleActualizarProducto} />
+      <TouchableOpacity onPress={handleActualizarProducto} style={styles.boton}>
+        <Text style={styles.botonText}>Actualizar Producto</Text>
+      </TouchableOpacity>
     </View>
   );
 };
@@ -97,11 +101,26 @@ const styles = StyleSheet.create({
     marginBottom: 5,
   },
   input: {
-    height: 40,
-    borderColor: "gray",
-    borderWidth: 1,
-    marginBottom: 10,
-    paddingHorizontal: 10,
+    width: "100%",
+    backgroundColor: "#D4D4D4",
+    borderBottomWidth: 1,
+    borderBottomColor: "#000",
+    paddingVertical: 8,
+    paddingLeft: 40,
+    color: "#333",
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  boton: {
+    backgroundColor: "#1C2120",
+    padding: 10,
+    borderRadius: 8,
+    width: "100%",
+    alignItems: "center",
+  },
+  botonText: {
+    color: "#fff",
+    fontWeight: "bold",
   },
 });
 

@@ -151,6 +151,7 @@ export default function Navigation() {
           name="Perfil"
           component={Perfil}
           options={{
+            headerShown: false,
             tabBarLabel: "Perfil",
             tabBarIcon: ({ color, size }) => (
               <Feather name="user" size={size} color={color} />
