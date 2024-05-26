@@ -12,9 +12,14 @@ import {
 import { BarCodeScanner } from "expo-barcode-scanner";
 import { Audio } from "expo-av";
 import { db, auth } from "../dataBase/Firebase";
-import { getDoc, doc, collection, addDoc } from "firebase/firestore";
+import {
+  getDoc,
+  doc,
+  collection,
+  addDoc,
+  writeBatch,
+} from "firebase/firestore";
 import { MaterialCommunityIcons } from "@expo/vector-icons";
-// import { serverTimestamp } from "firebase/firestore";
 
 const EscanerCodigoBarras = () => {
   const [hasPermission, setHasPermission] = useState(null);
@@ -69,6 +74,15 @@ const EscanerCodigoBarras = () => {
 
       const productoData = productoSnap.data();
       if (productoData) {
+        if (productoData.cantidad === 0) {
+          Alert.alert(`Producto ${productoData.nombreProducto} sin stock`);
+          return;
+        } else if (productoData.cantidad < 10) {
+          Alert.alert(
+            `Producto ${productoData.nombreProducto} ya casi no tiene stock`
+          );
+        }
+
         const existingProductIndex = carrito.findIndex(
           (item) => item.idProducto === productoData.idProducto
         );
@@ -123,56 +137,6 @@ const EscanerCodigoBarras = () => {
       return;
     }
 
-    const finalizarCompra = async () => {
-      if (carrito.length === 0) {
-        Alert.alert(
-          "Carrito vacío",
-          "Agrega al menos un producto al carrito antes de finalizar la compra."
-        );
-        return;
-      }
-
-      try {
-        const user = auth.currentUser;
-        if (user) {
-          const userId = user.uid;
-          const userDoc = doc(db, "users", userId);
-          const userSnap = await getDoc(userDoc);
-          if (userSnap.exists()) {
-            const userData = userSnap.data();
-            const firstName = userData.firstName;
-            console.log("Nombre del usuario:", firstName);
-
-            await addDoc(collection(db, "historialVentas"), {
-              carrito,
-              totalCompra,
-              fecha: obtenerFechaActual(),
-              usuario: { firstName },
-            });
-
-            setCarrito([]);
-            setTotalCompra(0);
-
-            Alert.alert("Compra finalizada");
-          } else {
-            console.error("Usuario no encontrado");
-            Alert.alert("Usuario no encontrado");
-          }
-        } else {
-          Alert.alert(
-            "Usuario no autenticado",
-            "Debes iniciar sesión para finalizar la compra."
-          );
-        }
-      } catch (error) {
-        console.error("Error al finalizar la compra:", error);
-        Alert.alert(
-          "Error al finalizar la compra",
-          "Por favor, inténtalo de nuevo más tarde."
-        );
-      }
-    };
-
     try {
       const user = auth.currentUser;
       if (user) {
@@ -183,6 +147,29 @@ const EscanerCodigoBarras = () => {
           const userData = userSnap.data();
           const firstName = userData.firstName;
           console.log("Nombre del usuario:", firstName);
+
+          const batch = writeBatch(db);
+
+          for (let producto of carrito) {
+            const productoDoc = doc(db, "productos", producto.idProducto);
+            const productoSnap = await getDoc(productoDoc);
+            if (productoSnap.exists()) {
+              const productoData = productoSnap.data();
+              const nuevaCantidad = productoData.cantidad - producto.cantidad;
+
+              if (nuevaCantidad < 0) {
+                Alert.alert(
+                  "Cantidad insuficiente",
+                  `No hay suficiente cantidad del producto ${productoData.nombreProducto}`
+                );
+                return;
+              }
+
+              batch.update(productoDoc, { cantidad: nuevaCantidad });
+            }
+          }
+
+          await batch.commit();
 
           await addDoc(collection(db, "historialVentas"), {
             carrito,
@@ -216,7 +203,6 @@ const EscanerCodigoBarras = () => {
 
   const reloadCamera = () => {
     setScanning(true);
-    setRefreshing(true);
     setReloadKey((prevKey) => prevKey + 1);
   };
 
@@ -239,7 +225,7 @@ const EscanerCodigoBarras = () => {
       <View style={styles.scannerContainer}>
         <BarCodeScanner
           key={reloadKey}
-          style={StyleSheet.absoluteFillObject}
+          style={[StyleSheet.absoluteFillObject, styles.barcodeScanner]}
           onBarCodeScanned={handleBarCodeScanned}
         />
         <View style={styles.scannerRect}></View>
