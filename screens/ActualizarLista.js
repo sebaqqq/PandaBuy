@@ -1,33 +1,32 @@
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import {
   View,
   Text,
   TextInput,
   TouchableOpacity,
   StyleSheet,
+  ScrollView,
+  Alert,
 } from "react-native";
+import { Picker } from "@react-native-picker/picker";
 import { useNavigation } from "@react-navigation/native";
 import { db } from "../dataBase/Firebase";
-import { doc, updateDoc } from "firebase/firestore";
+import { doc, updateDoc, collection, getDocs } from "firebase/firestore";
 
 const ActualizarLista = ({ route }) => {
   const { id } = route.params.producto;
-  const [nuevaCategoria, setNuevaCategoria] = useState(
-    route.params.producto.categoria
-  );
-  const [nuevoNombre, setNuevoNombre] = useState(
-    route.params.producto.nombreProducto
-  );
-  const [nuevoPrecio, setNuevoPrecio] = useState(
-    `${route.params.producto.precio}`
-  );
-  const [nuevoPrecioOferta, setNuevoPrecioOferta] = useState(
-    `${route.params.producto.precioOferta}`
-  );
-  const [nuevaCantidad, setNuevaCantidad] = useState(
-    route.params.producto.cantidad || "0"
-  );
+  const [nuevaCategoria, setNuevaCategoria] = useState(route.params.producto.categoria);
+  const [nuevoNombre, setNuevoNombre] = useState(route.params.producto.nombreProducto);
+  const [nuevoPrecio, setNuevoPrecio] = useState(`${route.params.producto.precio}`);
+  const [nuevoPrecioOferta, setNuevoPrecioOferta] = useState(`${route.params.producto.precioOferta}`);
+  const [nuevaCantidad, setNuevaCantidad] = useState(route.params.producto.cantidad || "0");
+  const [categorias, setCategorias] = useState([]);
+  const [refreshing, setRefreshing] = useState(false);
   const navigation = useNavigation();
+
+  useEffect(() => {
+    obtenerCategorias();
+  }, []);
 
   const handleActualizarProducto = async () => {
     try {
@@ -48,6 +47,20 @@ const ActualizarLista = ({ route }) => {
     }
   };
 
+  const obtenerCategorias = async () => {
+    try {
+      setRefreshing(true);
+      const categoriasSnapshot = await getDocs(collection(db, "categorias"));
+      const categoriasData = categoriasSnapshot.docs.map((doc) => doc.data().nombreCategoria);
+      setCategorias(categoriasData);
+      setRefreshing(false);
+    } catch (error) {
+      console.error("Error al obtener las categorías:", error);
+      Alert.alert("Error", "Hubo un error al obtener las categorías.");
+      setRefreshing(false);
+    }
+  };
+
   return (
     <View style={styles.container}>
       <Text style={styles.label}>ID:</Text>
@@ -58,12 +71,20 @@ const ActualizarLista = ({ route }) => {
         value={nuevoNombre}
         onChangeText={(text) => setNuevoNombre(text)}
       />
+
       <Text style={styles.label}>Categoría:</Text>
-      <TextInput
-        style={styles.input}
-        value={nuevaCategoria}
-        onChangeText={(text) => setNuevaCategoria(text)}
-      />
+      <View style={styles.pickerContainer}>
+        <Picker
+          selectedValue={nuevaCategoria}
+          onValueChange={(itemValue) => setNuevaCategoria(itemValue)}
+        >
+          <Picker.Item label="Seleccione una categoría" value="" />
+          {categorias.map((categoria, index) => (
+            <Picker.Item key={index} label={categoria} value={categoria} />
+          ))}
+        </Picker>
+      </View>
+
       <Text style={styles.label}>Precio:</Text>
       <TextInput
         style={styles.input}
@@ -71,6 +92,7 @@ const ActualizarLista = ({ route }) => {
         onChangeText={(text) => setNuevoPrecio(text)}
         keyboardType="numeric"
       />
+
       <Text style={styles.label}>Precio de Oferta:</Text>
       <TextInput
         style={styles.input}
@@ -108,6 +130,14 @@ const styles = StyleSheet.create({
     paddingVertical: 8,
     paddingLeft: 40,
     color: "#333",
+    borderRadius: 10,
+    marginBottom: 20,
+  },
+  pickerContainer: {
+    width: "100%",
+    backgroundColor: "#D4D4D4",
+    borderBottomWidth: 1,
+    borderBottomColor: "#000",
     borderRadius: 10,
     marginBottom: 20,
   },

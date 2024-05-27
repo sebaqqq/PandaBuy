@@ -72,9 +72,9 @@ function Perfil() {
         <Text>No hay datos</Text>
       ) : (
         <View style={CuentaStyles.profile}>
-          <Text style={CuentaStyles.subtitle}>Credencial de Usuario</Text>
+          <Text style={CuentaStyles.subtitle}>Perfil de Panda</Text>
           <Image
-            source={require("../images/panda_sin.png")}
+            source={require("../images/panda_recuperar.png")}
             style={CuentaStyles.logoImage}
           />
           {renderProfileInfo("user", `${user.firstName} ${user.lastName}`)}
@@ -89,8 +89,8 @@ const renderProfileInfo = (iconName, text) => (
   <View style={CuentaStyles.section}>
     <View style={CuentaStyles.iconTextContainer}>
       <FontAwesome name={iconName} size={19} color="#1C2120" />
+      <Text style={CuentaStyles.text}>{text}</Text>
     </View>
-    <Text style={CuentaStyles.text}>{text}</Text>
   </View>
 );
 

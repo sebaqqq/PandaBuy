@@ -70,7 +70,7 @@ export const LoginStyles = StyleSheet.create({
   input: {
     width: "100%",
     backgroundColor: "#D4D4D4",
-    borderBottomWidth: 1,
+    borderWidth: 1,
     borderBottomColor: "#000",
     paddingVertical: 8,
     paddingLeft: 40,
@@ -80,7 +80,7 @@ export const LoginStyles = StyleSheet.create({
   inputRecupear: {
     width: "80%",
     backgroundColor: "#D4D4D4",
-    borderBottomWidth: 1,
+    borderWidth: 1,
     borderBottomColor: "#000",
     paddingVertical: 8,
     paddingLeft: 40,

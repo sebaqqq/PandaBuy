@@ -61,10 +61,11 @@ const Historial = () => {
   const navigation = useNavigation();
   const [historialCompleto, setHistorialCompleto] = useState([]);
   const [historialFiltrado, setHistorialFiltrado] = useState([]);
-  const [totalPorFecha, setTotalPorFecha] = useState({});
+  const [totalPorFecha, setTotalPorFecha] = useState(0);
   const [totalPorMes, setTotalPorMes] = useState({});
   const [selectedDate, setSelectedDate] = useState("");
   const [refreshing, setRefreshing] = useState(false);
+  const [calendarVisible, setCalendarVisible] = useState(false);
 
   React.useLayoutEffect(() => {
     navigation.setOptions({
@@ -114,7 +115,6 @@ const Historial = () => {
         };
       });
       setHistorialCompleto(historialData);
-      calcularTotalPorFecha(historialData);
       calcularTotalPorMes(historialData);
     } catch (error) {
       console.error("Error fetching historial:", error);
@@ -122,13 +122,11 @@ const Historial = () => {
   };
 
   const calcularTotalPorFecha = (historialData) => {
-    const totalPorFecha = {};
+    let total = 0;
     historialData.forEach((item) => {
-      const fecha = formatFecha(item.fecha);
-      const totalCompra = parseFloat(item.totalCompra);
-      totalPorFecha[fecha] = (totalPorFecha[fecha] || 0) + totalCompra;
+      total += parseFloat(item.totalCompra);
     });
-    setTotalPorFecha(totalPorFecha);
+    setTotalPorFecha(total);
   };
 
   const calcularTotalPorMes = (historialData) => {
@@ -186,16 +184,26 @@ const Historial = () => {
 
   return (
     <View style={styles.container}>
-      <Calendar
-        onDayPress={(date) => {
-          handleDateSelect(date);
-        }}
-        markedDates={{
-          [selectedDate]: { selected: true, selectedColor: "#1C2120" },
-        }}
-        style={styles.calendario}
-        locale={"es"}
-      />
+      <TouchableOpacity
+        onPress={() => setCalendarVisible(!calendarVisible)}
+        style={styles.boton}
+      >
+        <Text style={styles.botonText}>
+          {calendarVisible ? "Ocultar Calendario" : "Mostrar Calendario"}
+        </Text>
+      </TouchableOpacity>
+      {calendarVisible && (
+        <Calendar
+          onDayPress={(date) => {
+            handleDateSelect(date);
+          }}
+          markedDates={{
+            [selectedDate]: { selected: true, selectedColor: "#1C2120" },
+          }}
+          style={styles.calendario}
+          locale={"es"}
+        />
+      )}
       <FlatList
         data={historialFiltrado}
         renderItem={renderItem}
@@ -206,11 +214,9 @@ const Historial = () => {
       />
       <View style={styles.totalContainer}>
         <Text style={styles.totalText}>Total por Día:</Text>
-        {Object.keys(totalPorFecha).map((fecha) => (
-          <Text key={fecha}>
-            {fecha}: {totalPorFecha[fecha]}
-          </Text>
-        ))}
+        <Text>
+          {selectedDate}: {totalPorFecha}
+        </Text>
       </View>
       <View style={styles.totalContainer}>
         <Text style={styles.totalText}>Total por Mes:</Text>
@@ -248,6 +254,7 @@ const styles = StyleSheet.create({
     borderRadius: 8,
     width: "70%",
     alignItems: "center",
+    marginVertical: 10,
   },
   botonText: {
     color: "#fff",

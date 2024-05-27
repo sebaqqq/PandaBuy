@@ -5,18 +5,16 @@ export const CuentaStyles = StyleSheet.create({
     flex: 1,
     backgroundColor: "#F0F0F0",
     borderRadius: 10,
-    margin: 30,
-    padding: 10,
     elevation: 3,
-    maxHeight: "90%",
-    width: "90%",
+    width: "100%",
+    height: "100%",
     alignSelf: "center",
   },
   header: {
     backgroundColor: "#1C2120",
     height: 90,
+    width: '100%',
     marginBottom: 20,
-    borderRadius: 10,
     flexDirection: "row",
     justifyContent: "space-between",
     alignItems: "center",
@@ -51,8 +49,8 @@ export const CuentaStyles = StyleSheet.create({
   section: {
     flexDirection: "row",
     alignItems: "center",
-    paddingLeft: 70,
-    marginBottom: 15,
+    marginLeft: 30, 
+    marginRight: 30,
   },
   text: {
     marginLeft: 5,
@@ -63,6 +61,14 @@ export const CuentaStyles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     justifyContent: "center",
+    backgroundColor: "#D4D4D4",
+    marginBottom: 10,
+    marginTop: 10,
+    width: "100%",
+    padding: 10,
+    borderRadius: 10,
+    borderWidth: 1,
+    borderColor: "gray"
   },
   logoImage: {
     width: 180,
@@ -80,4 +86,7 @@ export const CuentaStyles = StyleSheet.create({
     fontSize: 16,
     color: "#1C2120",
   },
+  userContenedor:{
+    color:"#1C2120",
+  }
 });

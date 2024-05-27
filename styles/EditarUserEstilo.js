@@ -5,7 +5,12 @@ export const EditarUserStyles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
-    padding: 16,
+    padding: 36,
+  },
+  logoImage: {
+    width: 100,   
+    height: 100,  
+    resizeMode: 'contain', 
   },
   textTitle: {
     fontSize: 34,
@@ -27,11 +32,13 @@ export const EditarUserStyles = StyleSheet.create({
   input: {
     height: 40,
     borderColor: "gray",
+    backgroundColor: "#D4D4D4",
     borderWidth: 1,
     marginBottom: 20,
     padding: 10,
     width: "100%",
-    borderRadius: 8,
+    borderRadius: 10,
+    paddingLeft: 20,
   },
   loadingContainer: {
     flex: 1,
